@@ -310,7 +310,103 @@ app.get("/unstoppable-domain", async (req, res) => {
 }
 });
 
+/* -----------------------------METADATA NORMALIZATION-----------------------------------*/
+//returns metadata in normalised form
+/*Refreshing metadata is resource intensive - therefore we have a cool-off 
+period during which the same token can’t be refreshed more than once.
+If the token_uri points to IPFS - we allow refreshing every 10 minutes 
+for each individual token.*/
+app.get("/metadata", async (req, res) => {
+  try { 
+  const response = await Moralis.EvmApi.nft.getNFTMetadata({
+  address:"0xb47e3cd837dDF8e4c57F05d70Ab865de6e193BBB",
+  chain:1,
+  tokenId: 1,
+  normalizeMetadata: true,
+  });
+  res.status(200).json(response);
+} catch (error) {
+  console.error(error);
+  res.status(500).json({ error: error.message });
+}
+});
 
+/* -----------------------------METADATA NFT-----------------------------------*/
+//returns metadata of nft
+app.get("/metadata-nft", async (req, res) => {
+  try { 
+  const response = await Moralis.EvmApi.nft.getNFTMetadata({
+  address:"0xb47e3cd837dDF8e4c57F05d70Ab865de6e193BBB",
+  chain:1,
+  tokenId: 3931,
+  });
+  res.status(200).json(response);
+} catch (error) {
+  console.error(error);
+  res.status(500).json({ error: error.message });
+}
+});
+
+/* -----------------------------NFT TRANSFER BY BLOCK-----------------------------------*/
+//All nfts transfered in a block
+app.get("/nft-transfer-by-block", async (req, res) => {
+  try { 
+  const response = await Moralis.EvmApi.nft.getNFTTransfersByBlock({
+    blockNumberOrHash:15846571,
+    chain,
+  });
+  res.status(200).json(response);
+} catch (error) {
+  console.error(error);
+  res.status(500).json({ error: error.message });
+}
+});
+
+/* -----------------------------NFT TRANSFER BY COLLECTION-----------------------------------*/
+//All nfts transfered in a collection
+app.get("/nft-transfer-by-contract", async (req, res) => {
+  try { 
+  const response = await Moralis.EvmApi.nft.getNFTContractTransfers({
+    address:"0xbc4ca0eda7647a8ab7c2061c2e118a18a936f13d",
+    chain,
+  });
+  res.status(200).json(response);
+} catch (error) {
+  console.error(error);
+  res.status(500).json({ error: error.message });
+}
+});
+
+/* -----------------------------NFT TRANSFER BY ID-----------------------------------*/
+//All nfts transfered by token id
+app.get("/nft-transfer-by-id", async (req, res) => {
+  try { 
+  const response = await Moralis.EvmApi.nft.getNFTTransfers({
+    address:"0xbc4ca0eda7647a8ab7c2061c2e118a18a936f13d",
+    tokenId:1,
+    chain,
+  });
+  res.status(200).json(response);
+} catch (error) {
+  console.error(error);
+  res.status(500).json({ error: error.message });
+}
+});
+
+/* -----------------------------NFT COLLECTION OWNED BY WALLET-----------------------------------*/
+
+app.get("/nft-collection-by-wallet", async (req, res) => {
+  try { 
+  const response = await Moralis.EvmApi.nft.getWalletNFTCollections({
+    address:"0xd8da6bf26964af9d7eed9e03e53415d37aa96045",
+    chain,
+  });
+  res.status(200).json(response);
+} catch (error) {
+  console.error(error);
+  res.status(500).json({ error: error.message });
+}
+});
 
 /* -----------------------------SERVER START-----------------------------------*/
 
