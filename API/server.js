@@ -10,6 +10,29 @@ const MORALIS_API_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJub25jZSI6IjUyZj
 const address = "0x6d77FA0c0cc1181ba128a25e25594f004e03a141";
 const chain =  EvmChain.ETHEREUM;
 
+/*FOR EVENT LOGS OF A CONTRACT*/
+
+const abi = {
+  anonymous: false,
+  inputs: [
+    {
+      indexed: true,
+      internalType: "address",
+      name: "from",
+      type: "address",
+    },
+    { indexed: true, internalType: "address", name: "to", type: "address" },
+    {
+      indexed: false,
+      internalType: "uint256",
+      name: "amount",
+      type: "uint256",
+    },
+  ],
+  name: "Transfer",
+  type: "event",
+};
+
 /* --------------------------------------DEMO--------------------------------*/
 async function getDemoData() {
     // Get native balance
@@ -250,7 +273,7 @@ app.get("/nft-transfer-by-wallet", async (req, res) => {
 
 app.get("/erc20-transfer-by-wallet", async (req, res) => {
   try { 
-  const response = await Moralis.EvmApi.nft.getWalletNFTTransfers({
+  const response = await Moralis.EvmApi.token.getWalletTokenTransfers({
     address :"0x6d77FA0c0cc1181ba128a25e25594f004e03a141",
     chain:11155111,
   });
@@ -399,6 +422,256 @@ app.get("/nft-collection-by-wallet", async (req, res) => {
   try { 
   const response = await Moralis.EvmApi.nft.getWalletNFTCollections({
     address:"0xd8da6bf26964af9d7eed9e03e53415d37aa96045",
+    chain,
+  });
+  res.status(200).json(response);
+} catch (error) {
+  console.error(error);
+  res.status(500).json({ error: error.message });
+}
+});
+
+/* -----------------------------NFT OWNERS BY CONTRACT-----------------------------------*/
+
+app.get("/nft-owner-by-contract", async (req, res) => {
+  try { 
+  const response = await Moralis.EvmApi.nft.getNFTOwners({
+    address:"0xd4e4078ca3495DE5B1d4dB434BEbc5a986197782",
+    chain,
+  });
+  res.status(200).json(response);
+} catch (error) {
+  console.error(error);
+  res.status(500).json({ error: error.message });
+}
+});
+
+/* -----------------------------NFT OWNERS BY TOKENID-----------------------------------*/
+
+app.get("/nft-owner-by-id", async (req, res) => {
+  try { 
+  const response = await Moralis.EvmApi.nft.getNFTTokenIdOwners({
+    address:"0xa186d739ca2b3022b966194004c6b01855d59571",
+    chain,
+    tokenId:1,
+  });
+  res.status(200).json(response);
+} catch (error) {
+  console.error(error);
+  res.status(500).json({ error: error.message });
+}
+});
+
+/* -----------------------------NFT OWNERS BY COLLECTION-----------------------------------*/
+
+app.get("/nft-owner-by-collection", async (req, res) => {
+  try { 
+  const response = await Moralis.EvmApi.nft.getNFTOwners({
+    address:"0xa186d739ca2b3022b966194004c6b01855d59571",
+    chain,
+  });
+  res.status(200).json(response);
+} catch (error) {
+  console.error(error);
+  res.status(500).json({ error: error.message });
+}
+});
+
+/* -----------------------------NFT LOWEST PRICE-----------------------------------*/
+
+app.get("/nft-lowest-price", async (req, res) => {
+  try { 
+  const response = await Moralis.EvmApi.nft.getNFTLowestPrice({
+    address:"0xBC4CA0EdA7647A8aB7C2061c2E118A18a936f13D",
+    chain,
+    marketplace:"opensea",
+  });
+  res.status(200).json(response);
+} catch (error) {
+  console.error(error);
+  res.status(500).json({ error: error.message });
+}
+});
+
+/* -----------------------------NFT TRADES BY MARKETPLACE-----------------------------------*/
+
+app.get("/nft-trades", async (req, res) => {
+  try { 
+  const response = await Moralis.EvmApi.nft.getNFTTrades({
+    address:"0xb47e3cd837dDF8e4c57F05d70Ab865de6e193BBB",
+    chain,
+    marketplace:"opensea",
+  });
+  res.status(200).json(response);
+} catch (error) {
+  console.error(error);
+  res.status(500).json({ error: error.message });
+}
+});
+
+/* -----------------------------top ERC20 tokens by price change-----------------------------------*/
+/*
+To use this API, you will need an API key under a Moralis account with the Pro 
+or above plan. To upgrade your API plan, go to the billing page in the Moralis Dashboard.
+*/
+app.get("/top-erc20", async (req, res) => {
+  try { 
+  const response = await Moralis.EvmApi.marketData.getTopERC20TokensByPriceMovers();
+  res.status(200).json(response);
+} catch (error) { 
+  console.error(error);
+  res.status(500).json({ error: error.message });
+}
+});
+
+/* -----------------------------top NFT collections by trading volume-----------------------------------*/
+/*
+To use this API, you will need an API key under a Moralis account with the Pro 
+or above plan. To upgrade your API plan, go to the billing page in the Moralis Dashboard.
+*/
+app.get("/top-nft", async (req, res) => {
+  try { 
+  const response = await Moralis.EvmApi.marketData.getHottestNFTCollectionsByTradingVolume();
+  res.status(200).json(response);
+} catch (error) { 
+  console.error(error);
+  res.status(500).json({ error: error.message });
+}
+});
+
+/* -----------------------------LOGS FOR CONTRACT-----------------------------------*/
+
+app.get("/logs-contract", async (req, res) => {
+  try { 
+  const response = await Moralis.EvmApi.events.getContractLogs({
+    address:"0xBC4CA0EdA7647A8aB7C2061c2E118A18a936f13D",
+    topic0:"0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef",
+    chain,
+  });
+  res.status(200).json(response);
+} catch (error) {
+  console.error(error);
+  res.status(500).json({ error: error.message });
+}
+});
+
+/* -----------------------------LOGS FOR CONTRACT-----------------------------------*/
+
+app.get("/logs-events", async (req, res) => {
+  try { 
+  const response = await Moralis.EvmApi.events.getContractEvents({
+    address:"0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984",
+    chain,
+    topic:"0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef",
+    abi,
+  });
+  res.status(200).json(response);
+} catch (error) {
+  console.error(error);
+  res.status(500).json({ error: error.message });
+}
+});
+
+/* -----------------------------LOGS FOR CONTRACT-----------------------------------*/
+
+app.get("/logs-contract", async (req, res) => {
+  try { 
+  const response = await Moralis.EvmApi.events.getContractLogs({
+    address:"0xBC4CA0EdA7647A8aB7C2061c2E118A18a936f13D",
+    topic0:"0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef",
+    chain,
+  });
+  res.status(200).json(response);
+} catch (error) {
+  console.error(error);
+  res.status(500).json({ error: error.message });
+}
+});
+
+/* -----------------------------ERC20 TOKEN PRICE-----------------------------------*/
+
+app.get("/erc20-price", async (req, res) => {
+  try { 
+  const response = await Moralis.EvmApi.token.getTokenPrice({
+    address:"0x2260fac5e5542a773aa44fbcfedf7c193bc2c599",
+    chain,
+  });
+  res.status(200).json(response);
+} catch (error) {
+  console.error(error);
+  res.status(500).json({ error: error.message });
+}
+});
+
+/* -----------------------------ERC20 TRANSFER BY CONTRACT-----------------------------------*/
+
+app.get("/erc20-transfer-by-contract", async (req, res) => {
+  try { 
+  const response = await Moralis.EvmApi.token.getTokenTransfers({
+    address:"0x1f9840a85d5af5bf1d1762f925bdaddc4201f984",
+    chain,
+  });
+  res.status(200).json(response);
+} catch (error) {
+  console.error(error);
+  res.status(500).json({ error: error.message });
+}
+});
+
+/* -----------------------------SUSHISWAP V2 PAIR ADDRESS-----------------------------------*/
+
+app.get("/sushiswap-address", async (req, res) => {
+  try { 
+  const response = await Moralis.EvmApi.defi.getPairAddress({
+    token0Address:"0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+    token1Address:"0x514910771AF9Ca656af840dff83E8264EcF986CA",
+    chain,
+    exchange: "sushiswapv2",
+  });
+  res.status(200).json(response);
+} catch (error) {
+  console.error(error);
+  res.status(500).json({ error: error.message });
+}
+});
+
+/* -----------------------------SUSHISWAP V2 PAIR RESERVES-----------------------------------*/
+
+app.get("/sushiswap-reserves", async (req, res) => {
+  try { 
+  const response = await Moralis.EvmApi.defi.getPairReserves({
+    pairAddress: "0xc40d16476380e4037e6b1a2594caf6a6cc8da967",
+    chain,
+  });
+  res.status(200).json(response);
+} catch (error) {
+  console.error(error);
+  res.status(500).json({ error: error.message });
+}
+});
+
+/* -----------------------------UNISWAP V2 PAIR ADDRESS-----------------------------------*/
+
+app.get("/uniswap-address", async (req, res) => {
+  try { 
+  const response = await Moralis.EvmApi.defi.getPairAddress({
+    token0Address:"0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+    token1Address:"0x514910771AF9Ca656af840dff83E8264EcF986CA",
+    chain,
+  });
+  res.status(200).json(response);
+} catch (error) {
+  console.error(error);
+  res.status(500).json({ error: error.message });
+}
+});
+
+/* -----------------------------UNISWAP V2 PAIR RESERVES-----------------------------------*/
+
+app.get("/uniswap-reserves", async (req, res) => {
+  try { 
+  const response = await Moralis.EvmApi.defi.getPairReserves({
+    pairAddress: "0xa2107fa5b38d9bbd2c461d6edf11b11a50f6b974",
     chain,
   });
   res.status(200).json(response);
