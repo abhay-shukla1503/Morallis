@@ -10,7 +10,7 @@ const MORALIS_API_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJub25jZSI6IjUyZj
 const address = "0x6d77FA0c0cc1181ba128a25e25594f004e03a141";
 const chain = EvmChain.ETHEREUM;
 
-/*FOR EVENT LOGS OF A CONTRACT*/
+/*--------------------------FOR EVENT LOGS OF A CONTRACT-------------------------------*/
 
 const abi = {
   anonymous: false,
@@ -83,11 +83,17 @@ async function getDemoData() {
 app.get("/demo", async (req, res) => {
   try {
     const data = await getDemoData();
-    res.status(200).json(data);
+    res.status(200).json({
+      statusCode: 200,
+      responseMessage: "Native Balance, Tokens Balance, NFT's Balance",
+      responseResult: data,
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({
-      error: error.message
+      statusCode: 500,
+      responseMessage: "Invalid Bad Request",
+      responseResult: error,
     });
   }
 });
@@ -102,11 +108,17 @@ app.get("/active-chains", async (req, res) => {
       address,
       chains,
     });
-    res.status(200).json(response.toJSON());
+    res.status(200).json({
+      statusCode: 200,
+      responseMessage: "Active Chains Of a Wallet",
+      responseResult: response,
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({
-      error: error.message
+      statusCode: 500,
+      responseMessage: "Invalid Bad Request",
+      responseResult: error,
     });
   }
 });
@@ -120,7 +132,11 @@ app.get("/native-balance", async (req, res) => {
       chain,
     });
     const native = response.result.balance.ether;
-    res.status(200).json("Balance: " + native + " Ether");
+    res.status(200).json({
+      statusCode: 200,
+      responseMessage: "Native Balance of Wallet",
+      responseResult: response,
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({
@@ -138,11 +154,17 @@ app.get("/native-erc20-balance", async (req, res) => {
       chain: 1,
     });
     const native = response.result.balance.ether;
-    res.status(200).json("Balance: " + native + " Tokens");
+    res.status(200).json({
+      statusCode: 200,
+      responseMessage: "Erc20 Tokens Owned By Contract Address",
+      responseResult: response,
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({
-      error: error.message
+      statusCode: 500,
+      responseMessage: "Invalid Bad Request",
+      responseResult: error,
     });
   }
 });
@@ -156,11 +178,17 @@ app.get("/multisig-balance", async (req, res) => {
       chain: 1,
     });
     const native = response.result.balance.ether;
-    res.status(200).json("Balance: " + native + " Tokens");
+    res.status(200).json({
+      statusCode: 200,
+      responseMessage: "Balance of a Multi Signature Wallet",
+      responseResult: response,
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({
-      error: error.message
+      statusCode: 500,
+      responseMessage: "Invalid Bad Request",
+      responseResult: error,
     });
   }
 });
@@ -173,12 +201,17 @@ app.get("/nft-owned", async (req, res) => {
       address: "0xd8da6bf26964af9d7eed9e03e53415d37aa96045",
       chain: 1,
     });
-    res.status(200).json(response);
-    console.log(response.toJSON());
+    res.status(200).json({
+      statusCode: 200,
+      responseMessage: "NFT's Owned In a Single Chain",
+      responseResult: response,
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({
-      error: error.message
+      statusCode: 500,
+      responseMessage: "Invalid Bad Request",
+      responseResult: error,
     });
   }
 });
@@ -196,12 +229,18 @@ app.get("/nft-owned-cross-chain", async (req, res) => {
       });
       array.push(response)
     }
-    res.status(200).json(array);
+    res.status(200).json({
+      statusCode: 200,
+      responseMessage: "NFT's Owned In Multi Chains",
+      responseResult: array,
+    });
 
   } catch (error) {
     console.error(error);
     res.status(500).json({
-      error: error.message
+      statusCode: 500,
+      responseMessage: "Invalid Bad Request",
+      responseResult: error,
     });
   }
 });
@@ -219,12 +258,18 @@ app.get("/nft-by-wallet", async (req, res) => {
       });
       array.push(response)
     }
-    res.status(200).json(array);
+    res.status(200).json({
+      statusCode: 200,
+      responseMessage: "All NFT's Owned By a Wallet",
+      responseResult: array,
+    });
 
   } catch (error) {
     console.error(error);
     res.status(500).json({
-      error: error.message
+      statusCode: 500,
+      responseMessage: "Invalid Bad Request",
+      responseResult: error,
     });
   }
 });
@@ -237,12 +282,18 @@ app.get("/nft-by-collection", async (req, res) => {
       address: "0xb47e3cd837dDF8e4c57F05d70Ab865de6e193BBB",
       chain,
     });
-    res.status(200).json(response);
+    res.status(200).json({
+      statusCode: 200,
+      responseMessage: "All NFT's In a Single Collection",
+      responseResult: response,
+    });
 
   } catch (error) {
     console.error(error);
     res.status(500).json({
-      error: error.message
+      statusCode: 500,
+      responseMessage: "Invalid Bad Request",
+      responseResult: error,
     });
   }
 });
@@ -255,12 +306,18 @@ app.get("/token-by-wallet", async (req, res) => {
       address: "0xbc4ca0eda7647a8ab7c2061c2e118a18a936f13d",
       chain,
     });
-    res.status(200).json(response);
+    res.status(200).json({
+      statusCode: 200,
+      responseMessage: "ERC20 Tokens Owned By a Wallet",
+      responseResult: response,
+    });
 
   } catch (error) {
     console.error(error);
     res.status(500).json({
-      error: error.message
+      statusCode: 500,
+      responseMessage: "Invalid Bad Request",
+      responseResult: error,
     });
   }
 });
@@ -273,12 +330,18 @@ app.get("/transactions-by-wallet", async (req, res) => {
       address: "0x6d77FA0c0cc1181ba128a25e25594f004e03a141",
       chain: 11155111,
     });
-    res.status(200).json(response);
+    res.status(200).json({
+      statusCode: 200,
+      responseMessage: "All Transactions Done By a Wallet",
+      responseResult: response,
+    });
 
   } catch (error) {
     console.error(error);
     res.status(500).json({
-      error: error.message
+      statusCode: 500,
+      responseMessage: "Invalid Bad Request",
+      responseResult: error,
     });
   }
 });
@@ -291,12 +354,18 @@ app.get("/nft-transfer-by-wallet", async (req, res) => {
       address: "0x6d77FA0c0cc1181ba128a25e25594f004e03a141",
       chain: 11155111,
     });
-    res.status(200).json(response);
+    res.status(200).json({
+      statusCode: 200,
+      responseMessage: "NFT Transfers Done By a Wallet",
+      responseResult: response,
+    });
 
   } catch (error) {
     console.error(error);
     res.status(500).json({
-      error: error.message
+      statusCode: 500,
+      responseMessage: "Invalid Bad Request",
+      responseResult: error,
     });
   }
 });
@@ -309,12 +378,18 @@ app.get("/erc20-transfer-by-wallet", async (req, res) => {
       address: "0x6d77FA0c0cc1181ba128a25e25594f004e03a141",
       chain: 11155111,
     });
-    res.status(200).json(response);
+    res.status(200).json({
+      statusCode: 200,
+      responseMessage: "ERC20 Tokens Transfered By a Wallet",
+      responseResult: response,
+    });
 
   } catch (error) {
     console.error(error);
     res.status(500).json({
-      error: error.message
+      statusCode: 500,
+      responseMessage: "Invalid Bad Request",
+      responseResult: error,
     });
   }
 });
@@ -328,12 +403,18 @@ app.get("/ens-domain", async (req, res) => {
     const response = await Moralis.EvmApi.resolve.resolveENSDomain({
       domain
     });
-    res.status(200).json(response);
+    res.status(200).json({
+      statusCode: 200,
+      responseMessage: "Address Linked To Given ENS Domain",
+      responseResult: response,
+    });
 
   } catch (error) {
     console.error(error);
     res.status(500).json({
-      error: error.message
+      statusCode: 500,
+      responseMessage: "Invalid Bad Request",
+      responseResult: error,
     });
   }
 });
@@ -346,12 +427,18 @@ app.get("/ens-domain-by-address", async (req, res) => {
     const response = await Moralis.EvmApi.resolve.resolveAddress({
       address: "0xd8da6bf26964af9d7eed9e03e53415d37aa96045"
     });
-    res.status(200).json(response);
+    res.status(200).json({
+      statusCode: 200,
+      responseMessage: "ENS Domain Linked to the Given Address",
+      responseResult: response,
+    });
 
   } catch (error) {
     console.error(error);
     res.status(500).json({
-      error: error.message
+      statusCode: 500,
+      responseMessage: "Invalid Bad Request",
+      responseResult: error,
     });
   }
 });
@@ -364,11 +451,17 @@ app.get("/unstoppable-domain", async (req, res) => {
     const response = await Moralis.EvmApi.resolve.resolveDomain({
       domain
     });
-    res.status(200).json(response);
+    res.status(200).json({
+      statusCode: 200,
+      responseMessage: "Address Linked To Given Unstoppable Domain",
+      responseResult: response,
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({
-      error: error.message
+      statusCode: 500,
+      responseMessage: "Invalid Bad Request",
+      responseResult: error,
     });
   }
 });
@@ -387,11 +480,17 @@ app.get("/metadata", async (req, res) => {
       tokenId: 1,
       normalizeMetadata: true,
     });
-    res.status(200).json(response);
+    res.status(200).json({
+      statusCode: 200,
+      responseMessage: "Normalized Meta Data Of NFT",
+      responseResult: response,
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({
-      error: error.message
+      statusCode: 500,
+      responseMessage: "Invalid Bad Request",
+      responseResult: error,
     });
   }
 });
@@ -405,11 +504,17 @@ app.get("/metadata-nft", async (req, res) => {
       chain: 1,
       tokenId: 3931,
     });
-    res.status(200).json(response);
+    res.status(200).json({
+      statusCode: 200,
+      responseMessage: "Meta Data Of NFT",
+      responseResult: response,
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({
-      error: error.message
+      statusCode: 500,
+      responseMessage: "Invalid Bad Request",
+      responseResult: error,
     });
   }
 });
@@ -422,11 +527,17 @@ app.get("/nft-transfer-by-block", async (req, res) => {
       blockNumberOrHash: 15846571,
       chain,
     });
-    res.status(200).json(response);
+    res.status(200).json({
+      statusCode: 200,
+      responseMessage: "All NFT's Transfered In a Block",
+      responseResult: response,
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({
-      error: error.message
+      statusCode: 500,
+      responseMessage: "Invalid Bad Request",
+      responseResult: error,
     });
   }
 });
@@ -439,11 +550,17 @@ app.get("/nft-transfer-by-contract", async (req, res) => {
       address: "0xbc4ca0eda7647a8ab7c2061c2e118a18a936f13d",
       chain,
     });
-    res.status(200).json(response);
+    res.status(200).json({
+      statusCode: 200,
+      responseMessage: "All NFT's Transfered In a Collection",
+      responseResult: response,
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({
-      error: error.message
+      statusCode: 500,
+      responseMessage: "Invalid Bad Request",
+      responseResult: error,
     });
   }
 });
@@ -457,11 +574,17 @@ app.get("/nft-transfer-by-id", async (req, res) => {
       tokenId: 1,
       chain,
     });
-    res.status(200).json(response);
+    res.status(200).json({
+      statusCode: 200,
+      responseMessage: "All Transferes Of NFT By Its Token ID",
+      responseResult: response,
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({
-      error: error.message
+      statusCode: 500,
+      responseMessage: "Invalid Bad Request",
+      responseResult: error,
     });
   }
 });
@@ -474,11 +597,17 @@ app.get("/nft-collection-by-wallet", async (req, res) => {
       address: "0xd8da6bf26964af9d7eed9e03e53415d37aa96045",
       chain,
     });
-    res.status(200).json(response);
+    res.status(200).json({
+      statusCode: 200,
+      responseMessage: "NFT Collection Owned By Wallet",
+      responseResult: response,
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({
-      error: error.message
+      statusCode: 500,
+      responseMessage: "Invalid Bad Request",
+      responseResult: error,
     });
   }
 });
@@ -491,11 +620,17 @@ app.get("/nft-owner-by-contract", async (req, res) => {
       address: "0xd4e4078ca3495DE5B1d4dB434BEbc5a986197782",
       chain,
     });
-    res.status(200).json(response);
+    res.status(200).json({
+      statusCode: 200,
+      responseMessage: "NFT Owners By Contract Address",
+      responseResult: response,
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({
-      error: error.message
+      statusCode: 500,
+      responseMessage: "Invalid Bad Request",
+      responseResult: error,
     });
   }
 });
@@ -509,11 +644,17 @@ app.get("/nft-owner-by-id", async (req, res) => {
       chain,
       tokenId: 1,
     });
-    res.status(200).json(response);
+    res.status(200).json({
+      statusCode: 200,
+      responseMessage: "NFT Owners By Token ID",
+      responseResult: response,
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({
-      error: error.message
+      statusCode: 500,
+      responseMessage: "Invalid Bad Request",
+      responseResult: error,
     });
   }
 });
@@ -526,11 +667,17 @@ app.get("/nft-owner-by-collection", async (req, res) => {
       address: "0xa186d739ca2b3022b966194004c6b01855d59571",
       chain,
     });
-    res.status(200).json(response);
+    res.status(200).json({
+      statusCode: 200,
+      responseMessage: "NFT Owners By Collection Address",
+      responseResult: response,
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({
-      error: error.message
+      statusCode: 500,
+      responseMessage: "Invalid Bad Request",
+      responseResult: error,
     });
   }
 });
@@ -544,11 +691,17 @@ app.get("/nft-lowest-price", async (req, res) => {
       chain,
       marketplace: "opensea",
     });
-    res.status(200).json(response);
+    res.status(200).json({
+      statusCode: 200,
+      responseMessage: "NFT's Lowest Price In Market",
+      responseResult: response,
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({
-      error: error.message
+      statusCode: 500,
+      responseMessage: "Invalid Bad Request",
+      responseResult: error,
     });
   }
 });
@@ -562,11 +715,17 @@ app.get("/nft-trades", async (req, res) => {
       chain,
       marketplace: "opensea",
     });
-    res.status(200).json(response);
+    res.status(200).json({
+      statusCode: 200,
+      responseMessage: "NFT's Available For Trade In Market Place",
+      responseResult: response,
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({
-      error: error.message
+      statusCode: 500,
+      responseMessage: "Invalid Bad Request",
+      responseResult: error,
     });
   }
 });
@@ -578,12 +737,19 @@ or above plan. To upgrade your API plan, go to the billing page in the Moralis D
 */
 app.get("/top-erc20", async (req, res) => {
   try {
-    const response = await Moralis.EvmApi.marketData.getTopERC20TokensByPriceMovers();
-    res.status(200).json(response);
+    const response =
+      await Moralis.EvmApi.marketData.getTopERC20TokensByPriceMovers();
+    return res.status(200).json({
+      statusCode: 200,
+      responseMessage: "List of TOP ERC20 Token",
+      responseResult: response,
+    });
   } catch (error) {
     console.error(error);
-    res.status(500).json({
-      error: error.message
+    return res.status(500).json({
+      statusCode: 500,
+      responseMessage: "Invalid Bad Request",
+      responseResult: error,
     });
   }
 });
@@ -595,12 +761,19 @@ or above plan. To upgrade your API plan, go to the billing page in the Moralis D
 */
 app.get("/top-nft", async (req, res) => {
   try {
-    const response = await Moralis.EvmApi.marketData.getHottestNFTCollectionsByTradingVolume();
-    res.status(200).json(response);
+    const response = 
+    await Moralis.EvmApi.marketData.getHottestNFTCollectionsByTradingVolume();
+    res.status(200).json({
+      statusCode: 200,
+      responseMessage: "List OF TOP NFT Collection By Trading Volume",
+      responseResult: response,
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({
-      error: error.message
+      statusCode: 500,
+      responseMessage: "Invalid Bad Request",
+      responseResult: error,
     });
   }
 });
@@ -614,16 +787,22 @@ app.get("/logs-contract", async (req, res) => {
       topic0: "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef",
       chain,
     });
-    res.status(200).json(response);
+    res.status(200).json({
+      statusCode: 200,
+      responseMessage: "Logs Of The Contract",
+      responseResult: response,
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({
-      error: error.message
+      statusCode: 500,
+      responseMessage: "Invalid Bad Request",
+      responseResult: error,
     });
   }
 });
 
-/* -----------------------------LOGS FOR CONTRACT-----------------------------------*/
+/* -----------------------------EVENTS FOR CONTRACT-----------------------------------*/
 
 app.get("/logs-events", async (req, res) => {
   try {
@@ -633,29 +812,17 @@ app.get("/logs-events", async (req, res) => {
       topic: "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef",
       abi,
     });
-    res.status(200).json(response);
+    res.status(200).json({
+      statusCode: 200,
+      responseMessage: "Events Of The Contract",
+      responseResult: response,
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({
-      error: error.message
-    });
-  }
-});
-
-/* -----------------------------LOGS FOR CONTRACT-----------------------------------*/
-
-app.get("/logs-contract", async (req, res) => {
-  try {
-    const response = await Moralis.EvmApi.events.getContractLogs({
-      address: "0xBC4CA0EdA7647A8aB7C2061c2E118A18a936f13D",
-      topic0: "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef",
-      chain,
-    });
-    res.status(200).json(response);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({
-      error: error.message
+      statusCode: 500,
+      responseMessage: "Invalid Bad Request",
+      responseResult: error,
     });
   }
 });
@@ -668,11 +835,17 @@ app.get("/erc20-price", async (req, res) => {
       address: "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599",
       chain,
     });
-    res.status(200).json(response);
+    res.status(200).json({
+      statusCode: 200,
+      responseMessage: "ERC20 Token Price",
+      responseResult: response,
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({
-      error: error.message
+      statusCode: 500,
+      responseMessage: "Invalid Bad Request",
+      responseResult: error,
     });
   }
 });
@@ -685,11 +858,17 @@ app.get("/erc20-transfer-by-contract", async (req, res) => {
       address: "0x1f9840a85d5af5bf1d1762f925bdaddc4201f984",
       chain,
     });
-    res.status(200).json(response);
+    res.status(200).json({
+      statusCode: 200,
+      responseMessage: "All Transferes Of ERC20 Tokens By Contract",
+      responseResult: response,
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({
-      error: error.message
+      statusCode: 500,
+      responseMessage: "Invalid Bad Request",
+      responseResult: error,
     });
   }
 });
@@ -704,11 +883,17 @@ app.get("/sushiswap-address", async (req, res) => {
       chain,
       exchange: "sushiswapv2",
     });
-    res.status(200).json(response);
+    res.status(200).json({
+      statusCode: 200,
+      responseMessage: "Pair Address By SushiSwap V2",
+      responseResult: response,
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({
-      error: error.message
+      statusCode: 500,
+      responseMessage: "Invalid Bad Request",
+      responseResult: error,
     });
   }
 });
@@ -721,11 +906,17 @@ app.get("/sushiswap-reserves", async (req, res) => {
       pairAddress: "0xc40d16476380e4037e6b1a2594caf6a6cc8da967",
       chain,
     });
-    res.status(200).json(response);
+    res.status(200).json({
+      statusCode: 200,
+      responseMessage: "Reserves Of Token By SushiSwap V2",
+      responseResult: response,
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({
-      error: error.message
+      statusCode: 500,
+      responseMessage: "Invalid Bad Request",
+      responseResult: error,
     });
   }
 });
@@ -739,11 +930,17 @@ app.get("/uniswap-address", async (req, res) => {
       token1Address: "0x514910771AF9Ca656af840dff83E8264EcF986CA",
       chain,
     });
-    res.status(200).json(response);
+    res.status(200).json({
+      statusCode: 200,
+      responseMessage: "Pair Address By UniSwap V2",
+      responseResult: response,
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({
-      error: error.message
+      statusCode: 500,
+      responseMessage: "Invalid Bad Request",
+      responseResult: error,
     });
   }
 });
@@ -756,11 +953,17 @@ app.get("/uniswap-reserves", async (req, res) => {
       pairAddress: "0xa2107fa5b38d9bbd2c461d6edf11b11a50f6b974",
       chain,
     });
-    res.status(200).json(response);
+    res.status(200).json({
+      statusCode: 200,
+      responseMessage: "Reserves Of Token By UniSwap V2",
+      responseResult: response,
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({
-      error: error.message
+      statusCode: 500,
+      responseMessage: "Invalid Bad Request",
+      responseResult: error,
     });
   }
 });
