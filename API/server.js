@@ -1,8 +1,7 @@
 const express = require("express")
 const Moralis = require("moralis").default;
 const {EvmChain} = require("@moralisweb3/common-evm-utils");
-
-
+ 
 const app = express();
 const PORT = 3000;
 
