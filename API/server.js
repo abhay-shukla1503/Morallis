@@ -1,15 +1,15 @@
 const express = require("express")
+const bodyParser = require("body-parser");
 const Moralis = require("moralis").default;
 const {EvmChain} = require("@moralisweb3/common-evm-utils");
  
 const app = express();
 const PORT = 3000;
+app.use(bodyParser.json());
 
 const MORALIS_API_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJub25jZSI6IjUyZjNlNDM4LTA0ZjEtNDhlOC1iMzY2LTBmZTI0NjAxM2FlMCIsIm9yZ0lkIjoiMzYwMTYyIiwidXNlcklkIjoiMzcwMTUxIiwidHlwZUlkIjoiODM2MDM1ZDItOTdiNS00NzhkLWI0ZjgtMThiYjA5YmRiZjQ3IiwidHlwZSI6IlBST0pFQ1QiLCJpYXQiOjE2OTY2NTU0NTcsImV4cCI6NDg1MjQxNTQ1N30.fAegGLW2lFzLy2AiGKDlFXLNTxab6IpjGR7SP7kzNcY";
-const address = "0x6d77FA0c0cc1181ba128a25e25594f004e03a141";
-const chain = EvmChain.ETHEREUM;
 
-/*--------------------------FOR EVENT LOGS OF A CONTRACT-------------------------------*/
+/*--------------------------FOR EVENTS OF A CONTRACT-------------------------------*/
 
 const abi = {
   anonymous: false,
@@ -36,73 +36,11 @@ const abi = {
   type: "event",
 };
 
-/* --------------------------------------DEMO--------------------------------*/
-async function getDemoData() {
-  // Get native balance
-  const nativeBalance = await Moralis.EvmApi.balance.getNativeBalance({
-    address,
-    chain,
-  });
-
-  // Format the native balance formatted in ether via the .ether getter
-  const native = nativeBalance.result.balance.ether;
-
-  // Get token balances
-  const tokenBalances = await Moralis.EvmApi.token.getWalletTokenBalances({
-    address,
-    chain,
-  });
-
-  // Format the balances to a readable output with the .display() method
-  const tokens = tokenBalances.result.map((token) => token.display());
-
-  // Get the nfts
-  const nftsBalances = await Moralis.EvmApi.nft.getWalletNFTs({
-    address,
-    chain,
-    limit: 10,
-  });
-
-  // Format the output to return name, amount and metadata
-  const nfts = nftsBalances.result.map((nft) => ({
-    name: nft.result.name,
-    amount: nft.result.amount,
-    metadata: nft.result.metadata,
-  }));
-
-  return {
-    native,
-    tokens,
-    nfts
-  };
-}
-
-/* ----------------------------------DEMO---------------------------------------*/
-
-app.get("/demo", async (req, res) => {
-  try {
-    const data = await getDemoData();
-    res.status(200).json({
-      statusCode: 200,
-      responseMessage: "Native Balance, Tokens Balance, NFT's Balance",
-      responseResult: data,
-    });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({
-      statusCode: 500,
-      responseMessage: "Invalid Bad Request",
-      responseResult: error,
-    });
-  }
-});
-
 /* ----------------------------------ACTIVE CHAINS------------------------------*/
 
-app.get("/active-chains", async (req, res) => {
+app.post("/active-chains", async (req, res) => {
   try {
-    const address = "0xd8da6bf26964af9d7eed9e03e53415d37aa96045";
-    const chains = [EvmChain.ETHEREUM, EvmChain.BSC, EvmChain.POLYGON];
+    const {address,chains} = req.body;
     const response = await Moralis.EvmApi.wallets.getWalletActiveChains({
       address,
       chains,
@@ -124,17 +62,19 @@ app.get("/active-chains", async (req, res) => {
 
 /* ----------------------------------NATIVE BALANCE------------------------------*/
 //actual balance of wallet
-app.get("/native-balance", async (req, res) => {
+app.post("/native-balance", async (req, res) => {
   try {
+    const {address,chain} = req.body;
     const response = await Moralis.EvmApi.balance.getNativeBalance({
       address,
       chain,
     });
+    const chainId = chain;
     const native = response.result.balance.ether;
     res.status(200).json({
       statusCode: 200,
       responseMessage: "Native Balance of Wallet",
-      responseResult: response,
+      responseResult: {native,chainId}
     });
   } catch (error) {
     console.error(error);
@@ -148,15 +88,16 @@ app.get("/native-balance", async (req, res) => {
 //owned by contract address
 app.get("/native-erc20-balance", async (req, res) => {
   try {
+    const {address,chain} = req.body;
     const response = await Moralis.EvmApi.balance.getNativeBalance({
-      address: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
-      chain: 1,
+      address,
+      chain,
     });
     const native = response.result.balance.ether;
     res.status(200).json({
       statusCode: 200,
       responseMessage: "Erc20 Tokens Owned By Contract Address",
-      responseResult: response,
+      responseResult: native,
     });
   } catch (error) {
     console.error(error);
@@ -170,17 +111,22 @@ app.get("/native-erc20-balance", async (req, res) => {
 
 /* ----------------------------------MULTI SIGNATURE WALLET------------------------------*/
 
-app.get("/multisig-balance", async (req, res) => {
+app.post("/multisig-balance", async (req, res) => {
   try {
+    const {address,chain} = req.body;
     const response = await Moralis.EvmApi.balance.getNativeBalance({
-      address: "0x849D52316331967b6fF1198e5E32A0eB168D039d",
-      chain: 1,
+     /* 
+     "address": "0x849D52316331967b6fF1198e5E32A0eB168D039d",
+     "chain": 1
+     */
+      address,
+      chain,
     });
     const native = response.result.balance.ether;
     res.status(200).json({
       statusCode: 200,
       responseMessage: "Balance of a Multi Signature Wallet",
-      responseResult: response,
+      responseResult: native,
     });
   } catch (error) {
     console.error(error);
@@ -194,17 +140,27 @@ app.get("/multisig-balance", async (req, res) => {
 
 /* ----------------------------------NFT OWNED---------------------------------*/
 //only in single chain
-app.get("/nft-owned", async (req, res) => {
+app.post("/nft-owned", async (req, res) => {
   try {
+    const {address,chain} = req.body;
     const response = await Moralis.EvmApi.nft.getWalletNFTs({
-      address: "0xd8da6bf26964af9d7eed9e03e53415d37aa96045",
-      chain: 1,
+      // "address": "0xd8da6bf26964af9d7eed9e03e53415d37aa96045",
+      // "chain": 1
+      address,
+      chain,
     });
-    res.status(200).json({
+    const filteredResponse = {
       statusCode: 200,
       responseMessage: "NFT's Owned In a Single Chain",
-      responseResult: response,
-    });
+      responseResult: {
+        result: response.result.map((nft) => ({
+          amount: nft.amount,
+          name: nft.name,
+          symbol: nft.symbol,
+        })),
+      },
+    }; 
+    res.status(200).json(filteredResponse);
   } catch (error) {
     console.error(error);
     res.status(500).json({
@@ -221,17 +177,22 @@ app.get("/nft-owned-cross-chain", async (req, res) => {
   try {
     const array = [];
     const chains = [1, 56, 137];
+    const {address} = req.body;
     for (const chain of chains) {
       const response = await Moralis.EvmApi.nft.getWalletNFTs({
-        address: "0xd8da6bf26964af9d7eed9e03e53415d37aa96045",
-        chain,
+        /*
+        "address": "0xd8da6bf26964af9d7eed9e03e53415d37aa96045",
+        */
+        address,
+        chain
       });
       array.push(response)
     }
+    
     res.status(200).json({
       statusCode: 200,
       responseMessage: "NFT's Owned In Multi Chains",
-      responseResult: array,
+      responseResult: array, 
     });
 
   } catch (error) {
@@ -250,9 +211,11 @@ app.get("/nft-by-wallet", async (req, res) => {
   try {
     const array = [];
     const chains = [1, 56, 137];
+    const{address} = req.body;
     for (const chain of chains) {
       const response = await Moralis.EvmApi.nft.getWalletNFTs({
-        address: "0xd8da6bf26964af9d7eed9e03e53415d37aa96045",
+        //"address": "0xd8da6bf26964af9d7eed9e03e53415d37aa96045"
+        address,
         chain,
       });
       array.push(response)
@@ -275,17 +238,29 @@ app.get("/nft-by-wallet", async (req, res) => {
 
 /* -----------------------------NFTs BY COLLECTION-----------------------------------*/
 //all nfts in a single collection
-app.get("/nft-by-collection", async (req, res) => {
+app.post("/nft-by-collection", async (req, res) => {
   try {
+    const {address,chain} = req.body;
     const response = await Moralis.EvmApi.nft.getContractNFTs({
-      address: "0xb47e3cd837dDF8e4c57F05d70Ab865de6e193BBB",
-      chain,
+      /*
+      "address": "0xb47e3cd837dDF8e4c57F05d70Ab865de6e193BBB",
+      "chain":1
+      */
+     address,
+     chain,
     });
-    res.status(200).json({
+    const filteredResponse = {
       statusCode: 200,
-      responseMessage: "All NFT's In a Single Collection",
-      responseResult: response,
-    });
+      responseMessage: "NFT's Owned In a Single Chain",
+      responseResult: {
+        result: response.result.map((nft) => ({
+          amount: nft.amount,
+          name: nft.name,
+          symbol: nft.symbol,
+        })),
+      },
+    }; 
+    res.status(200).json(filteredResponse);
 
   } catch (error) {
     console.error(error);
@@ -301,8 +276,13 @@ app.get("/nft-by-collection", async (req, res) => {
 
 app.get("/token-by-wallet", async (req, res) => {
   try {
+    const{address,chain} = req.body;
     const response = await Moralis.EvmApi.token.getWalletTokenBalances({
-      address: "0xbc4ca0eda7647a8ab7c2061c2e118a18a936f13d",
+     /*
+      "address": "0xbc4ca0eda7647a8ab7c2061c2e118a18a936f13d",
+      "chain":1
+      */
+      address,
       chain,
     });
     res.status(200).json({
@@ -325,15 +305,25 @@ app.get("/token-by-wallet", async (req, res) => {
 
 app.get("/transactions-by-wallet", async (req, res) => {
   try {
+    const{address,chain} = req.body;
     const response = await Moralis.EvmApi.transaction.getWalletTransactions({
-      address: "0x6d77FA0c0cc1181ba128a25e25594f004e03a141",
-      chain: 11155111,
+      /*
+      "address": "0x6d77FA0c0cc1181ba128a25e25594f004e03a141",
+      "chain": 11155111
+      */
+      address,
+      chain
     });
-    res.status(200).json({
+    const filteredResponse = {
       statusCode: 200,
       responseMessage: "All Transactions Done By a Wallet",
-      responseResult: response,
-    });
+      responseResult: {
+        page_size: response.page_size,
+        page: response.page,
+        result: response.result
+      }
+    };
+    res.status(200).json(filteredResponse);
 
   } catch (error) {
     console.error(error);
@@ -349,15 +339,25 @@ app.get("/transactions-by-wallet", async (req, res) => {
 
 app.get("/nft-transfer-by-wallet", async (req, res) => {
   try {
+    const{address,chain} = req.body;
     const response = await Moralis.EvmApi.nft.getWalletNFTTransfers({
-      address: "0x6d77FA0c0cc1181ba128a25e25594f004e03a141",
-      chain: 11155111,
+      /*
+      "address": "0x6d77FA0c0cc1181ba128a25e25594f004e03a141",
+      "chain": 11155111
+      */
+     address,
+     chain
     });
-    res.status(200).json({
+    const filteredResponse = {
       statusCode: 200,
-      responseMessage: "NFT Transfers Done By a Wallet",
-      responseResult: response,
-    });
+      responseMessage: "All NFT Trnsfered By a Wallet",
+      responseResult: {
+        page_size: response.page_size,
+        page: response.page,
+        result: response.result
+      }
+    };
+    res.status(200).json(filteredResponse);
 
   } catch (error) {
     console.error(error);
@@ -373,9 +373,14 @@ app.get("/nft-transfer-by-wallet", async (req, res) => {
 
 app.get("/erc20-transfer-by-wallet", async (req, res) => {
   try {
+    const {address,chain} = req.body;
     const response = await Moralis.EvmApi.token.getWalletTokenTransfers({
-      address: "0x6d77FA0c0cc1181ba128a25e25594f004e03a141",
-      chain: 11155111,
+      /*
+      "address": "0x6d77FA0c0cc1181ba128a25e25594f004e03a141",
+      "chain": 11155111
+      */
+     address,
+     chain
     });
     res.status(200).json({
       statusCode: 200,
@@ -398,7 +403,8 @@ app.get("/erc20-transfer-by-wallet", async (req, res) => {
 // .art, .club, .nft, .blockchain, .coin
 app.get("/ens-domain", async (req, res) => {
   try {
-    const domain = "vitalik.eth";
+    const {domain} = req.body;
+    // "domain": "vitalik.eth" 
     const response = await Moralis.EvmApi.resolve.resolveENSDomain({
       domain
     });
@@ -423,8 +429,10 @@ app.get("/ens-domain", async (req, res) => {
 
 app.get("/ens-domain-by-address", async (req, res) => {
   try {
+    const {address} = req.body;
     const response = await Moralis.EvmApi.resolve.resolveAddress({
-      address: "0xd8da6bf26964af9d7eed9e03e53415d37aa96045"
+     // "address": "0xd8da6bf26964af9d7eed9e03e53415d37aa96045"
+      address
     });
     res.status(200).json({
       statusCode: 200,
@@ -444,9 +452,10 @@ app.get("/ens-domain-by-address", async (req, res) => {
 
 /* -----------------------------ADDRESS BY UNSTOPPABLE DOMAIN-----------------------------------*/
 //unstoppable as an alternative eg:-.crypto,.zil
-app.get("/unstoppable-domain", async (req, res) => {
+app.post("/unstoppable-domain", async (req, res) => {
   try {
-    const domain = "brad.crypto";
+    const {domain} = req.body;
+    // "domain": "brad.crypto"
     const response = await Moralis.EvmApi.resolve.resolveDomain({
       domain
     });
@@ -471,12 +480,18 @@ app.get("/unstoppable-domain", async (req, res) => {
 period during which the same token can’t be refreshed more than once.
 If the token_uri points to IPFS - we allow refreshing every 10 minutes 
 for each individual token.*/
-app.get("/metadata", async (req, res) => {
+app.post("/metadata", async (req, res) => {
   try {
+    const {address,chain,tokenId} = req.body;
     const response = await Moralis.EvmApi.nft.getNFTMetadata({
-      address: "0xb47e3cd837dDF8e4c57F05d70Ab865de6e193BBB",
-      chain: 1,
-      tokenId: 1,
+      /*
+      "address": "0xb47e3cd837dDF8e4c57F05d70Ab865de6e193BBB",
+      "chain": 1,
+      "tokenId": 1
+      */
+      address,
+      chain,
+      tokenId,
       normalizeMetadata: true,
     });
     res.status(200).json({
@@ -496,12 +511,18 @@ app.get("/metadata", async (req, res) => {
 
 /* -----------------------------METADATA NFT-----------------------------------*/
 //returns metadata of nft
-app.get("/metadata-nft", async (req, res) => {
+app.post("/metadata-nft", async (req, res) => {
   try {
+    const {address,chain,tokenId} = req.body;
     const response = await Moralis.EvmApi.nft.getNFTMetadata({
-      address: "0xb47e3cd837dDF8e4c57F05d70Ab865de6e193BBB",
-      chain: 1,
-      tokenId: 3931,
+      /*
+      "address": "0xb47e3cd837dDF8e4c57F05d70Ab865de6e193BBB",
+      "chain": 1,
+      "tokenId": 3931
+      */
+     address,
+     chain,
+     tokenId
     });
     res.status(200).json({
       statusCode: 200,
@@ -520,17 +541,27 @@ app.get("/metadata-nft", async (req, res) => {
 
 /* -----------------------------NFT TRANSFER BY BLOCK-----------------------------------*/
 //All nfts transfered in a block
-app.get("/nft-transfer-by-block", async (req, res) => {
+app.post("/nft-transfer-by-block", async (req, res) => {
   try {
+    const {blockNumberOrHash,chain} = req.body;
     const response = await Moralis.EvmApi.nft.getNFTTransfersByBlock({
-      blockNumberOrHash: 15846571,
-      chain,
+      /*
+      "blockNumberOrHash": 15846571,
+      "chain":1
+      */
+      blockNumberOrHash,
+      chain
     });
-    res.status(200).json({
+    const filteredResponse = {
       statusCode: 200,
       responseMessage: "All NFT's Transfered In a Block",
-      responseResult: response,
-    });
+      responseResult: {
+        page: response.page,
+        page_size: response.page_size,
+        result: response.result
+      }
+    };
+    res.status(200).json(filteredResponse);
   } catch (error) {
     console.error(error);
     res.status(500).json({
@@ -541,19 +572,29 @@ app.get("/nft-transfer-by-block", async (req, res) => {
   }
 });
 
-/* -----------------------------NFT TRANSFER BY COLLECTION-----------------------------------*/
+/* -----------------------------NFT TRANSFER BY CONTRACT-----------------------------------*/
 //All nfts transfered in a collection
 app.get("/nft-transfer-by-contract", async (req, res) => {
   try {
+    const {address,chain} = req.body;
     const response = await Moralis.EvmApi.nft.getNFTContractTransfers({
-      address: "0xbc4ca0eda7647a8ab7c2061c2e118a18a936f13d",
-      chain,
+      /*
+      "address": "0xbc4ca0eda7647a8ab7c2061c2e118a18a936f13d",
+      "chain":1
+      */
+     address,
+     chain
     });
-    res.status(200).json({
+    const filteredResponse = {
       statusCode: 200,
       responseMessage: "All NFT's Transfered In a Collection",
-      responseResult: response,
-    });
+      responseResult: {
+        page: response.page,
+        page_size: response.page_size,
+        result: response.result
+      }
+    };
+    res.status(200).json(filteredResponse);
   } catch (error) {
     console.error(error);
     res.status(500).json({
@@ -568,16 +609,27 @@ app.get("/nft-transfer-by-contract", async (req, res) => {
 //All nfts transfered by token id
 app.get("/nft-transfer-by-id", async (req, res) => {
   try {
+    const {address,tokenId,chain} = req.body;
     const response = await Moralis.EvmApi.nft.getNFTTransfers({
-      address: "0xbc4ca0eda7647a8ab7c2061c2e118a18a936f13d",
-      tokenId: 1,
-      chain,
+      /*
+      "address": "0xbc4ca0eda7647a8ab7c2061c2e118a18a936f13d",
+      "tokenId": 1,
+      "chain":1
+      */
+     address,
+     tokenId,
+     chain
     });
-    res.status(200).json({
+    const filteredResponse = {
       statusCode: 200,
       responseMessage: "All Transferes Of NFT By Its Token ID",
-      responseResult: response,
-    });
+      responseResult: {
+        page: response.page,
+        page_size: response.page_size,
+        result: response.result
+      }
+    };
+    res.status(200).json(filteredResponse);
   } catch (error) {
     console.error(error);
     res.status(500).json({
@@ -592,15 +644,25 @@ app.get("/nft-transfer-by-id", async (req, res) => {
 
 app.get("/nft-collection-by-wallet", async (req, res) => {
   try {
+    const {address,chain} = req.body;
     const response = await Moralis.EvmApi.nft.getWalletNFTCollections({
-      address: "0xd8da6bf26964af9d7eed9e03e53415d37aa96045",
-      chain,
+      /*
+      "address": "0xd8da6bf26964af9d7eed9e03e53415d37aa96045",
+      "chain":1
+      */
+     address,
+     chain
     });
-    res.status(200).json({
+    const filteredResponse = {
       statusCode: 200,
       responseMessage: "NFT Collection Owned By Wallet",
-      responseResult: response,
-    });
+      responseResult: {
+        page: response.page,
+        page_size: response.page_size,
+        result: response.result
+      }
+    };
+    res.status(200).json(filteredResponse);
   } catch (error) {
     console.error(error);
     res.status(500).json({
@@ -615,15 +677,29 @@ app.get("/nft-collection-by-wallet", async (req, res) => {
 
 app.get("/nft-owner-by-contract", async (req, res) => {
   try {
+    const {address,chain} = req.body;
     const response = await Moralis.EvmApi.nft.getNFTOwners({
-      address: "0xd4e4078ca3495DE5B1d4dB434BEbc5a986197782",
-      chain,
+      /*
+      "address": "0x6d77FA0c0cc1181ba128a25e25594f004e03a141",
+      "chain":11155111
+      */
+     address,
+     chain
     });
-    res.status(200).json({
+    const filteredResult = response.result.map(item => {
+      const { tokenUri, ...rest } = item._data;
+      return { _data: rest };
+    });
+    const filteredResponse = {
       statusCode: 200,
       responseMessage: "NFT Owners By Contract Address",
-      responseResult: response,
-    });
+      responseResult: {
+        page: response.page,
+        page_size: response.page_size,
+        result: filteredResult
+      }
+    };
+    res.status(200).json(filteredResponse);
   } catch (error) {
     console.error(error);
     res.status(500).json({
@@ -636,18 +712,34 @@ app.get("/nft-owner-by-contract", async (req, res) => {
 
 /* -----------------------------NFT OWNERS BY TOKENID-----------------------------------*/
 
-app.get("/nft-owner-by-id", async (req, res) => {
+app.post("/nft-owner-by-id", async (req, res) => {
   try {
+    const {address,chain,tokenId} = req.body;
     const response = await Moralis.EvmApi.nft.getNFTTokenIdOwners({
-      address: "0xa186d739ca2b3022b966194004c6b01855d59571",
+     /*
+      "address": "0xa186d739ca2b3022b966194004c6b01855d59571",
+      "chain":1,
+      "tokenId": 1
+      */
+      address,
       chain,
-      tokenId: 1,
+      tokenId
     });
-    res.status(200).json({
+    const filteredResult = response.result.map(item => {
+      const { metadata, ...rest } = item._data;
+      return { _data: rest };
+    });
+    const filteredResponse = {
       statusCode: 200,
       responseMessage: "NFT Owners By Token ID",
-      responseResult: response,
-    });
+      responseResult: {
+        page: response.page,
+        page_size: response.page_size,
+        cursor: response.cursor,
+        result: filteredResult
+      }
+    };
+    res.status(200).json(filteredResponse);
   } catch (error) {
     console.error(error);
     res.status(500).json({
@@ -662,15 +754,30 @@ app.get("/nft-owner-by-id", async (req, res) => {
 
 app.get("/nft-owner-by-collection", async (req, res) => {
   try {
+    const {address,chain} = req.body;
     const response = await Moralis.EvmApi.nft.getNFTOwners({
-      address: "0xa186d739ca2b3022b966194004c6b01855d59571",
-      chain,
+      /*
+      "address": "0xa186d739ca2b3022b966194004c6b01855d59571",
+      "chain":1
+      */
+     address,
+     chain
     });
-    res.status(200).json({
+    const filteredResult = response.result.map(item => {
+      const { metadata, ...rest } = item._data;
+      return { _data: rest };
+    });
+    const filteredResponse = {
       statusCode: 200,
       responseMessage: "NFT Owners By Collection Address",
-      responseResult: response,
-    });
+      responseResult: {
+        page: response.page,
+        page_size: response.page_size,
+        cursor: response.cursor,
+        result: filteredResult
+      }
+    };
+    res.status(200).json(filteredResponse);
   } catch (error) {
     console.error(error);
     res.status(500).json({
@@ -685,10 +792,16 @@ app.get("/nft-owner-by-collection", async (req, res) => {
 
 app.get("/nft-lowest-price", async (req, res) => {
   try {
+    const {address,chain,marketplace} = req.body;
     const response = await Moralis.EvmApi.nft.getNFTLowestPrice({
-      address: "0xBC4CA0EdA7647A8aB7C2061c2E118A18a936f13D",
-      chain,
-      marketplace: "opensea",
+      /*
+      "address": "0xBC4CA0EdA7647A8aB7C2061c2E118A18a936f13D",
+      "chain":1,
+      "marketplace": "opensea"
+      */
+     address,
+     chain,
+     marketplace
     });
     res.status(200).json({
       statusCode: 200,
@@ -709,10 +822,16 @@ app.get("/nft-lowest-price", async (req, res) => {
 
 app.get("/nft-trades", async (req, res) => {
   try {
+    const {address,chain,marketplace} = req.body;
     const response = await Moralis.EvmApi.nft.getNFTTrades({
-      address: "0xb47e3cd837dDF8e4c57F05d70Ab865de6e193BBB",
+      /*
+      "address": "0xb47e3cd837dDF8e4c57F05d70Ab865de6e193BBB",
+      "chain":1,
+      "marketplace": "opensea"
+      */
+      address,
       chain,
-      marketplace: "opensea",
+      marketplace
     });
     res.status(200).json({
       statusCode: 200,
@@ -779,18 +898,29 @@ app.get("/top-nft", async (req, res) => {
 
 /* -----------------------------LOGS FOR CONTRACT-----------------------------------*/
 
-app.get("/logs-contract", async (req, res) => {
+app.post("/logs-contract", async (req, res) => {
   try {
+    const {address,topic0,chain} = req.body;
     const response = await Moralis.EvmApi.events.getContractLogs({
-      address: "0xBC4CA0EdA7647A8aB7C2061c2E118A18a936f13D",
-      topic0: "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef",
-      chain,
+      /* 
+      "address": "0xBC4CA0EdA7647A8aB7C2061c2E118A18a936f13D",
+       "topic0": "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef",
+       "chain":1
+       */
+      address,
+      topic0,
+      chain
     });
-    res.status(200).json({
+    const filteredResponse = {
       statusCode: 200,
-      responseMessage: "Logs Of The Contract",
-      responseResult: response,
-    });
+      responseMessage: "Events Of The Contract",
+      responseResult: {
+        page_size: response.page_size,
+        page: response.page,
+        result: response.result
+      }
+    };
+    res.status(200).json(filteredResponse);
   } catch (error) {
     console.error(error);
     res.status(500).json({
@@ -803,19 +933,30 @@ app.get("/logs-contract", async (req, res) => {
 
 /* -----------------------------EVENTS FOR CONTRACT-----------------------------------*/
 
-app.get("/logs-events", async (req, res) => {
+app.post("/logs-events", async (req, res) => {
   try {
+    const {address,topic,chain} = req.body;
     const response = await Moralis.EvmApi.events.getContractEvents({
-      address: "0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984",
+      /* 
+      "address": "0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984",
+      "topic": "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef",
+       "chain":1
+       */
+      address,
+      topic,
       chain,
-      topic: "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef",
-      abi,
+      abi
     });
-    res.status(200).json({
+    const filteredResponse = {
       statusCode: 200,
       responseMessage: "Events Of The Contract",
-      responseResult: response,
-    });
+      responseResult: {
+        page_size: response.page_size,
+        page: response.page,
+        result: response.result
+      }
+    };
+    res.status(200).json(filteredResponse);
   } catch (error) {
     console.error(error);
     res.status(500).json({
@@ -830,9 +971,14 @@ app.get("/logs-events", async (req, res) => {
 
 app.get("/erc20-price", async (req, res) => {
   try {
+    const{address,chain} = req.body;
     const response = await Moralis.EvmApi.token.getTokenPrice({
-      address: "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599",
-      chain,
+      /*
+      "address": "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599",
+      "chain":1
+      */
+     address,
+     chain
     });
     res.status(200).json({
       statusCode: 200,
@@ -851,11 +997,16 @@ app.get("/erc20-price", async (req, res) => {
 
 /* -----------------------------ERC20 TRANSFER BY CONTRACT-----------------------------------*/
 
-app.get("/erc20-transfer-by-contract", async (req, res) => {
+app.post("/erc20-transfer-by-contract", async (req, res) => {
   try {
+    const{address,chain} = req.body;
     const response = await Moralis.EvmApi.token.getTokenTransfers({
-      address: "0x1f9840a85d5af5bf1d1762f925bdaddc4201f984",
-      chain,
+      /*
+      "address": "0x1f9840a85d5af5bf1d1762f925bdaddc4201f984",
+      "chain":1
+      */
+     address,
+     chain
     });
     res.status(200).json({
       statusCode: 200,
@@ -876,9 +1027,15 @@ app.get("/erc20-transfer-by-contract", async (req, res) => {
 
 app.get("/sushiswap-address", async (req, res) => {
   try {
+    const {token0Address,token1Address,chain,} =req.body;
     const response = await Moralis.EvmApi.defi.getPairAddress({
-      token0Address: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
-      token1Address: "0x514910771AF9Ca656af840dff83E8264EcF986CA",
+      /*
+      "token0Address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+      "token1Address": "0x514910771AF9Ca656af840dff83E8264EcF986CA",
+      "chain":1
+      */
+      token0Address,
+      token1Address,
       chain,
       exchange: "sushiswapv2",
     });
@@ -901,9 +1058,14 @@ app.get("/sushiswap-address", async (req, res) => {
 
 app.get("/sushiswap-reserves", async (req, res) => {
   try {
+    const {pairAddress,chain,} =req.body;
     const response = await Moralis.EvmApi.defi.getPairReserves({
-      pairAddress: "0xc40d16476380e4037e6b1a2594caf6a6cc8da967",
-      chain,
+      /*
+      "pairAddress": "0xc40d16476380e4037e6b1a2594caf6a6cc8da967",
+      "chain":1
+      */
+     pairAddress,
+     chain
     });
     res.status(200).json({
       statusCode: 200,
@@ -922,11 +1084,17 @@ app.get("/sushiswap-reserves", async (req, res) => {
 
 /* -----------------------------UNISWAP V2 PAIR ADDRESS-----------------------------------*/
 
-app.get("/uniswap-address", async (req, res) => {
+app.post("/uniswap-address", async (req, res) => {
   try {
+    const {token0Address,token1Address,chain,} =req.body;
     const response = await Moralis.EvmApi.defi.getPairAddress({
-      token0Address: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
-      token1Address: "0x514910771AF9Ca656af840dff83E8264EcF986CA",
+      /*
+      "token0Address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+      "token1Address": "0x514910771AF9Ca656af840dff83E8264EcF986CA",
+      "chain":1
+      */
+      token0Address,
+      token1Address,
       chain,
     });
     res.status(200).json({
@@ -946,11 +1114,16 @@ app.get("/uniswap-address", async (req, res) => {
 
 /* -----------------------------UNISWAP V2 PAIR RESERVES-----------------------------------*/
 
-app.get("/uniswap-reserves", async (req, res) => {
+app.post("/uniswap-reserves", async (req, res) => {
   try {
+    const {pairAddress,chain,} =req.body;
     const response = await Moralis.EvmApi.defi.getPairReserves({
-      pairAddress: "0xa2107fa5b38d9bbd2c461d6edf11b11a50f6b974",
-      chain,
+      /*
+      "pairAddress": "0xa2107fa5b38d9bbd2c461d6edf11b11a50f6b974",
+      "chain":1
+      */
+      pairAddress,
+     chain
     });
     res.status(200).json({
       statusCode: 200,
